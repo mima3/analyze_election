@@ -1,11 +1,18 @@
+[session]
+path = ./session
+
+[database]
+election_db = ./election.sqlite
+
 [pdf]
-pdftotext_path = c:\tool\xpdf\pdftotext
 
 [MeCab]
 user_dict =C:\dev\python\yukkuri.dic
 sys_dict =
 
 [Twitter]
+consumer_key = TODO
+consumer_secret = TODO
 
 [system]
 path0 = /home/needtec/local/lib/python/site-packages/Genshi-0.6-py2.7.egg

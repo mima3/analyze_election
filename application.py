@@ -1,11 +1,27 @@
 # coding=utf-8
-from bottle import get, post, template, request, Bottle, response
+from bottle import get, post, template, request, Bottle, response, redirect
 from json import dumps
 from election_db import ElectionDb
+from twitter_utility import TwitterUtility
+import os
 
 app = Bottle()
-dbpath = './election.sqlite'
-db = ElectionDb(dbpath)
+db = None
+
+
+twitter_util = None
+
+def setup(conf):
+    global app
+    global db
+    global twitter_util
+
+    dbpath = conf.get('database', 'election_db')
+    db = ElectionDb(dbpath)
+
+    consumer_key = conf.get('Twitter', 'consumer_key')
+    consumer_secret =  conf.get('Twitter', 'consumer_secret')
+    twitter_util = TwitterUtility(consumer_key, consumer_secret, 'https://api.twitter.com/oauth/request_token', 'https://api.twitter.com/oauth/authenticate' , 'https://api.twitter.com/oauth/access_token')
 
 def convertGeoResult(ret):
     dict = {}
@@ -96,5 +112,39 @@ def electionAreaPage():
     prefectures = db.GetPrefecture()
     return template('electionArea', prefectures=prefectures).replace('\n', '');
 
-#if __name__ == '__main__':
-#    run(host='localhost', port=8080)
+###########################################
+# Twitter関連
+###########################################
+@app.get('/login')
+def login():
+    callback_url = "https://" + os.environ['HTTP_HOST']  + os.path.dirname(os.environ['REQUEST_URI']) + '/auth'
+    url,request_token = twitter_util.get_request_token(callback_url)
+
+    session = request.environ.get('beaker.session')
+    session['request_token'] = request_token
+    session.save()
+
+    redirect(url)
+
+@app.get('/auth')
+def auth():
+    session = request.environ.get('beaker.session')
+    if not session.has_key('request_token'):
+      url = 'https://' + os.environ['HTTP_HOST'] + '/' + os.path.dirname(os.environ['REQUEST_URI']) + '/login'
+      redirect(url)
+      return
+    request_token = session['request_token']
+    try:
+        access_token = twitter_util.get_access_token(request.query.oauth_token, request.query.oauth_verifier)
+        session['access_token'] = access_token
+        session.save()
+        return session['access_token']
+    except Exception, e:
+        return e
+
+@app.get('/logout')
+def logout():
+    session = request.environ.get('beaker.session')
+    session.delete()
+    return 'logout...'
+

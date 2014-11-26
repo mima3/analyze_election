@@ -1,0 +1,30 @@
+#![python_path]
+# coding: utf-8
+from bottle import run
+import ConfigParser
+import sys
+from beaker.middleware import SessionMiddleware
+
+conf = ConfigParser.SafeConfigParser()
+conf.read("[ini_path]")
+try:
+  i = 0
+  path = conf.get('system', 'path' + str(i))
+  while path != "":
+    i = i + 1
+    sys.path.append(path)
+    path = conf.get('system', 'path' + str(i))
+except ConfigParser.NoOptionError as e:
+  pass
+
+from application import app, setup
+session_opts = {
+    'session.type': 'file',
+    'session.data_dir': conf.get('session', 'path'),
+    'session.cookie_expires': True,
+    'session.auto': True
+}
+setup(conf)
+appSession = SessionMiddleware(app, session_opts)
+
+run(appSession, server='cgi')
