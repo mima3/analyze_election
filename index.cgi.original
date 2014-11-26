@@ -3,7 +3,6 @@
 from bottle import run
 import ConfigParser
 import sys
-from beaker.middleware import SessionMiddleware
 
 conf = ConfigParser.SafeConfigParser()
 conf.read("[ini_path]")
@@ -25,6 +24,8 @@ session_opts = {
     'session.auto': True
 }
 setup(conf)
+
+from beaker.middleware import SessionMiddleware
 appSession = SessionMiddleware(app, session_opts)
 
 run(appSession, server='cgi')
