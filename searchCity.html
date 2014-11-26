@@ -1,0 +1,208 @@
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Street View service</title>
+    <link rel="stylesheet" href="js/jquery-ui.min.css" type="text/css" />
+    <link rel="stylesheet" href="base.css" type="text/css" />
+    <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.10.4.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script>
+$(function() {
+  $(document).ready(function() {
+    var pt = new google.maps.LatLng(41.925926, 143.240137);
+    var mapOptions = {
+      center: pt,
+      zoom: 8
+    };
+    var map = new google.maps.Map(
+      document.getElementById('map_canvas'),
+      mapOptions
+    );
+    var polylines=[];
+
+    $('#searchCityBtn').button().click(function() {
+      $.ajax({
+        url: 'json/GetCityGeo',
+        type: 'GET',
+        cache: false,
+        dataType: 'json',
+        data: {
+          'prefectureName': $('#prefectureName').val(),
+          'subPrefectureName': $('#subPrefectureName').val(),
+          'countryName': $('#countryName').val(),
+          'cityName': $('#cityName').val()
+        },
+        timeout: 30000,
+        mimeType: 'application/json;charset=utf-8',
+        // 送信前
+        beforeSend: function() {
+        },
+        // 応答後
+        complete: function() {
+        },
+
+        // 通信成功時の処理
+        success: function(data, textStatus, xhr) {
+          console.log(data);
+          for(var i = 0; i < polylines.length; ++i) {
+            polylines[i].setMap(null);
+          }
+          polylines = [];
+          var cnt = 0;
+          for (var id in data) {
+            var points = [];
+            for (var i = 0; i < data[id].length; ++i) {
+               if (i == 0 && polylines.length==0) {
+                 map.panTo(new google.maps.LatLng(data[id][i][0],data[id][i][1]));
+               }
+               points.push(new google.maps.LatLng(data[id][i][0],data[id][i][1]));
+            }
+            var poly = new google.maps.Polyline({
+              path: points,
+              strokeColor: "#00FF00",
+              strokeOpacity: 1.0,
+              strokeWeight: 2
+            });
+            poly.setMap(map);
+            polylines.push(poly);
+          }
+        },
+
+        // 通信失敗時の処理
+        error: function(xhr, textStatus, error) {
+          if (!error) {
+            error = 'ConnectError';
+          }
+          console.log(error);
+        }
+      });
+    });
+    $('#getCurLocBtn').button().click(function() {
+      if (!navigator.geolocation) {
+        //Geolocation APIを利用できる環境向けの処理
+      }
+      navigator.geolocation.getCurrentPosition(function(position) {
+        //curPos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        //map.panTo(curPos);
+        //drawCircle();
+        $('#lat').val(position.coords.latitude);
+        $('#lng').val(position.coords.longitude);
+        map.panTo(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+      },function(positionError) {
+        consloe.log(positionError.message);
+      });
+    });
+    $('#covCurToAreaBtn').button().click(function() {
+      $.ajax({
+        url: 'json/GetGeoToCity',
+        type: 'GET',
+        cache: false,
+        dataType: 'json',
+        data: {
+          'lat': $('#lat').val(),
+          'lng': $('#lng').val()
+        },
+        timeout: 30000,
+        mimeType: 'application/json;charset=utf-8',
+        // 送信前
+        beforeSend: function() {
+        },
+        // 応答後
+        complete: function() {
+        },
+
+        // 通信成功時の処理
+        success: function(data, textStatus, xhr) {
+          console.log(data);
+          if (!data) {
+            return;
+          }
+          $('#prefectureName').val(data.prefectureName);
+          $('#subPrefectureName').val(data.subPrefectureName);
+          $('#countryName').val(data.countyName);
+          $('#cityName').val(data.cityName);
+        },
+
+        // 通信失敗時の処理
+        error: function(xhr, textStatus, error) {
+          if (!error) {
+            error = 'ConnectError';
+          }
+          console.log(error);
+        }
+      });
+    });
+
+    $('#getElectionAreaBtn').button().click(function() {
+      $.ajax({
+        url: 'json/GetElectionArea',
+        type: 'GET',
+        cache: false,
+        dataType: 'json',
+        data: {
+          'prefectureName': $('#prefectureName').val(),
+          'subPrefectureName': $('#subPrefectureName').val(),
+          'countryName': $('#countryName').val(),
+          'cityName': $('#cityName').val()
+        },
+        timeout: 30000,
+        mimeType: 'application/json;charset=utf-8',
+        // 送信前
+        beforeSend: function() {
+        },
+        // 応答後
+        complete: function() {
+        },
+
+        // 通信成功時の処理
+        success: function(data, textStatus, xhr) {
+          console.log(data);
+          var info = ''
+          for (var i = 0; i < data.length; ++i) {
+            info += data[i].key + '\n' + data[i].notes;
+          }
+          $('#electionArea').val(info);
+        },
+
+        // 通信失敗時の処理
+        error: function(xhr, textStatus, error) {
+          if (!error) {
+            error = 'ConnectError';
+          }
+          console.log(error);
+        }
+      });
+    });
+    
+  });
+});
+    </script>
+  </head>
+  <body>
+    <div id="contents">
+      <h1>市町村検索</h1>
+      <div id="map_canvas" style="width: 100%; height: 400px"></div>
+      <p>prefectureName <input type="text" id="prefectureName"></p>
+      <p>subPrefectureName <input type="text" id="subPrefectureName"></p>
+      <p>countryName <input type="text" id="countryName"></p>
+      <p>cityName <input type="text" id="cityName"></p>
+      <p><button id="searchCityBtn">行政区域検索</button></p>
+      <p>prefectureNameは必須で都道府県名をいれてください。</p>
+      <p>このデータは以下から取得したものです</p>
+      <p><a href="http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03.html">国土数値情報　行政区域データ</a></p>
+      <p>
+        <input type="text" id="lat"/>
+        <input type="text" id="lng"/>
+        <button id="getCurLocBtn">現在地</button>
+      </p>
+      <p><button id="covCurToAreaBtn">現在地から行政区域</button></p>
+      <p><button id="getElectionAreaBtn">選挙区取得</button></p>
+      <textarea id="electionArea" rows="4" cols="40"></textarea>
+    </div>
+  </body>
+</html>
+
