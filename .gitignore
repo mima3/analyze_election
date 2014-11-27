@@ -47,3 +47,4 @@ Temporary Items
 /serif.ini
 /index.cgi
 /session
+/script/*.pyc
