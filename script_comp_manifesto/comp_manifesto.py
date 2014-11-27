@@ -95,11 +95,13 @@ def get_party_content(name, url):
 
 
 def main(argvs, argc):
-    if(argc != 3):
-        print "Usage #python %s output_imagefile output_jsonfile" % argvs[0]
+    if(argc != 4):
+        print ("Usage #python %s output_imagefile output_jsonfile font_path" % argvs[0])
+        print ('font path : ex "ms ui gothic" or "/home/fonts/ipca.ttc"')
         return -1
     output_imagefile = argvs[1]
     output_jsonfile = argvs[2]
+    font_path = argvs[3]
 
     partys = {
         "自民党": "http://jimin.ncss.nifty.com/pdf/news/policy/126585_1.pdf",
@@ -161,7 +163,7 @@ def main(argvs, argc):
     f.close()
 
     distance_result = calc_distance.calc_distance(results)
-    graphviz_distance.draw_distance(distance_result, output_imagefile)
+    graphviz_distance.draw_distance(distance_result, output_imagefile, font_path)
 
 
 if __name__ == '__main__':

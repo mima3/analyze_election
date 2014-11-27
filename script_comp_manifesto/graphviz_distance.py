@@ -2,7 +2,7 @@
 import pydot
 
 
-def draw_distance(distance_result, output_file):
+def draw_distance(distance_result, output_file, font_path):
     """
     •¶ÍŠÔ‚Ì‹——£‚ğGraphViz‚Å•\Œ»‚·‚é
     @param distance_result •¶ÍŠÔ‚Ì‹——£
@@ -33,7 +33,7 @@ def draw_distance(distance_result, output_file):
     graph = pydot.Dot(graph_type='graph')
     nodes = {}
     for f, dic in distance_result.items():
-        nodes[f] = pydot.Node(f, label=f, style="filled", fillcolor="white", fontname="ms ui gothic", shape="box")
+        nodes[f] = pydot.Node(f, label=f, style="filled", fillcolor="white", fontname=font_path, shape="box")
         graph.add_node(nodes[f])
 
     records = []
