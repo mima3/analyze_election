@@ -105,14 +105,13 @@ def main(argvs, argc):
 
     partys = {
         "自民党": "http://jimin.ncss.nifty.com/pdf/news/policy/126585_1.pdf",
-        #"公明党": "https://www.komei.or.jp/policy/policy/pdf/manifesto2013.pdf",
+        "公明党": "http://www.komei.or.jp/campaign/shuin2014/manifesto/manifesto2014.pdf",
         "民主党": "http://www.dpj.or.jp/global/downloads/manifesto2014.pdf",
         "維新の党": "https://ishinnotoh.jp/activity/news/2014/11/23/20141122-seisaku.pdf",
         #"次世代の党": "http://jisedai.jp/cp-bin/wordpress/wp-content/uploads/2014/11/%EF%BC%88%E6%94%BF%E7%AD%96%E9%9B%86%EF%BC%89%E6%AC%A1%E4%B8%96%E4%BB%A3%E3%81%8C%E8%AA%87%E3%82%8A%E3%82%92%E6%8C%81%E3%81%A6%E3%82%8B%E6%97%A5%E6%9C%AC%E3%82%92.pdf",
         #"共産党": "http://www.jcp.or.jp/web_download/seisaku/201307_seisaku_panf.pdf",
         "生活の党": "http://www.seikatsu1.jp/wp-content/uploads/0c4778a35f0cfe0a34fd3085e210a5c4.pdf"
-        #"社民党": "http://www5.sdp.or.jp/policy/policy/election/2013/data/digest.pdf",
-        #"みどりの風": "http://mikaze.jp/news/upload/1372851421_1.pdf"
+        #"社民党": "http://www5.sdp.or.jp/policy/policy/election/2013/data/digest.pdf" # 公示後
     }
 
     docs = []

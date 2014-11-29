@@ -9,6 +9,8 @@
   <div id="contents">
     <h1>選挙情報</h1>
     <p><a href="/analyze_election/page/ElectionArea">小選挙区の区割り情報</a></p>
+    <h2>ニコ生の解析結果</h2>
+    <p><a href="/analyze_election/page/nicolive/lv200730443">【衆院選2014】ネット党首討論</a></p>
   </div>
 </body>
 </html>

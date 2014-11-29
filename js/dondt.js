@@ -26,7 +26,14 @@ $(function() {
 
   $(document).ready(function()
   {
-    var vote_data = [];
+    var vote_data = [
+      {
+        name: '自民党',
+        votes: 0,
+        max: 0,
+        seats: 0
+      }
+    ];
     $("#calc_dondt").button().click(function(event){
       event.preventDefault();
       calc_dondt( function() {} );

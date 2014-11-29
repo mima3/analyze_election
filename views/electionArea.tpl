@@ -24,7 +24,7 @@
     </select>
     <select id="selElectionArea"><option>　　　　　　　　　　</option></select>
     <div id="map_canvas" style="width: 100%; height: 400px"></div>
-    <table>
+    <table class="normal">
       <thead>
         <th>小区</th>
         <th>郡</th>

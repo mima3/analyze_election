@@ -4,6 +4,8 @@ from json import dumps
 from election_db import ElectionDb
 from twitter_utility import TwitterUtility
 import os
+import json
+import math
 
 app = Bottle()
 db = None
@@ -107,10 +109,112 @@ def getElectionAreaInformation():
     return dumps(res)
 
 
+@app.get('/')
+def homePage():
+    return template('home').replace('\n', '');
+
+
 @app.get('/page/ElectionArea')
 def electionAreaPage():
     prefectures = db.GetPrefecture()
     return template('electionArea', prefectures=prefectures).replace('\n', '');
+
+
+@app.get('/page/dondt')
+def electionAreaPage():
+    prefectures = db.GetPrefecture()
+    return template('dondt', prefectures=prefectures).replace('\n', '');
+
+
+@app.get('/page/nicolive/<nicoliveId>')
+def nicoLivePage(nicoliveId):
+    return template('nicolive', nicoliveId=nicoliveId).replace('\n', '');
+
+def representsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
+@app.get('/json/get_nicolive_comment/<nicoliveId>')
+def getNicoLiveComment(nicoliveId):
+    limit = 20
+    page = int(request.query.page)
+    offset = limit * (page-1)
+    filters = []
+    filter_user_id = ''
+    filter_premium = ''
+    filter_content = ''
+    filter_mail = ''
+    filter_score_lt = ''
+    if (request.query.filters):
+        filters = json.loads(request.query.filters)
+        for rule in filters['rules']:
+            if (rule['field'] == 'user_id'):
+                filter_user_id = rule['data']
+            if (rule['field'] == 'premium'):
+                filter_premium = rule['data']
+            if (rule['field'] == 'content'):
+                filter_content = rule['data']
+            if (rule['field'] == 'mail'):
+                filter_mail = rule['data']
+            if (rule['field'] == 'score' and representsInt(rule['data'])):
+                filter_score_lt = rule['data']
+    path = os.path.dirname(__file__) + '/niconico/' + nicoliveId + '.json'
+    f = open(path, 'r')
+    json_data = json.load(f)
+    f.close()
+    rows = []
+    i = 0
+    rowcnt = 0
+    for data in json_data:
+        premium = ''
+        score = ''
+        mail = ''
+        if 'premium' in data:
+            premium = data['premium']
+        if 'score' in data:
+            score = data['score']
+        if 'mail' in data:
+            mail = data['mail']
+
+        if filter_user_id:
+            if filter_user_id != data['user_id']:
+                continue
+        if filter_mail:
+            if str(filter_mail) != str(mail):
+                continue
+
+        if filter_premium:
+            if str(filter_premium) != str(premium):
+                continue
+        if filter_content:
+            if data['content'].find(filter_content) == -1:
+                continue
+
+        if filter_score_lt:
+            if not representsInt(score):
+                continue
+            if int(filter_score_lt) <= int(score):
+                continue
+
+        if rowcnt < limit and offset <= i:
+            cells = [
+                data['user_id'], 
+                premium,
+                data['content'],
+                data['vpos'],
+                score, 
+                mail
+            ]
+            row = {'id':i, 'cell': cells}
+            rowcnt += 1
+            rows.append(row)
+        i += 1
+    res = {'page' : page, 'total': math.ceil(float(i)/limit), 'records' : i, 'rows' : rows}
+    response.content_type = 'application/json;charset=utf-8'
+    return dumps(res)
+
 
 ###########################################
 # Twitter関連
