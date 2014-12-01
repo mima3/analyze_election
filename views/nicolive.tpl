@@ -25,18 +25,25 @@
 <body>
   <div id="contents">
     <h1>ニコ生(<a href="http://live.nicovideo.jp/watch/{{nicoliveId}}">{{nicoliveId}}</a>)の解析</h1>
-    <h2>コメント中の単語</h2>
+    <h2>メニュー</h2>
+    <ul>
+      <li><a href="#termHead">コメント中の単語</a></li>
+      <li><a href="#timeHead">開演からのコメント数</a></li>
+      <li><a href="#userHead">発言者</a></li>
+      <li><a href="#commentHead">全コメント</a></li>
+    </ul>
+    <h2 id="termHead">コメント中の単語</h2>
     <p>全コメント中に複数回、出現した単語数を集計します。</p>
     <div id="termTagCloud" style="width: 100%; height: 480px;"></div>
     <table id="termsTable" ></table>
-    <h2>開演からのコメント数</h2>
+    <h2 id="timeHead">開演からのコメント数</h2>
     <p>開演時間からのコメント数の遷移を表します。※放映開始時間ではありません</p>
     <div id="timePlot" style="width: 100%; height: 480px;"></div>
     <table id="timesTable" ></table>
-    <h2>発言者</h2>
+    <h2 id="userHead">発言者</h2>
     <p>複数回コメントしたユーザの一覧を表示します。</p>
     <table id="usersTable" ></table>
-    <h2>全データ</h2>
+    <h2 id="commentHead">全コメント</h2>
     <table id="commentTable" class="scroll"></table>
     <div id="commentPager" ></div>
 
