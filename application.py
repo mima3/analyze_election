@@ -130,12 +130,14 @@ def electionAreaPage():
 def nicoLivePage(nicoliveId):
     return template('nicolive', nicoliveId=nicoliveId).replace('\n', '');
 
+
 def representsInt(s):
     try: 
         int(s)
         return True
     except ValueError:
         return False
+
 @app.get('/json/get_nicolive_comment/<nicoliveId>')
 def getNicoLiveComment(nicoliveId):
     limit = 20
@@ -214,6 +216,22 @@ def getNicoLiveComment(nicoliveId):
     res = {'page' : page, 'total': math.ceil(float(i)/limit), 'records' : i, 'rows' : rows}
     response.content_type = 'application/json;charset=utf-8'
     return dumps(res)
+
+
+@app.get('/page/analyzehp/<year>')
+def analyzeHpPage(year):
+    path = ('%s/script_comp_manifesto/party_hp_json_%s.json' % (os.path.dirname(__file__), year))
+
+    f = open(path, 'r')
+    party_data = json.load(f)
+    f.close()
+
+    path = ('%s/script_comp_manifesto/party_hp_result_%s.json' % (os.path.dirname(__file__), year))
+    f = open(path, 'r')
+    party_result_data = json.load(f)
+    f.close()
+
+    return template('analyzehp', year=year, party_data=party_data, party_result_data=party_result_data).replace('\n', '');
 
 
 ###########################################

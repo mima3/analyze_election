@@ -119,7 +119,6 @@ def main(argvs, argc):
     partys = json.load(f)
     f.close()
 
-
     docs = []
     effective_partys = []
     for k, v in partys.items():

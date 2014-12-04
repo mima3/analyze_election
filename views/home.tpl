@@ -13,7 +13,8 @@
     <h3>2014 衆院選</h3>
     <p><a href="/analyze_election/page/nicolive/lv200730443">【衆院選2014】ネット党首討論</a></p>
     <p><a href="/analyze_election/page/nicolive/lv201303080">党首討論会 in 日本記者クラブ（時事通信チャンネル）</a></p>
-    
+    <h3>各政党のホームページの解析結果</h3>
+    <p><a href="/analyze_election/page/analyzehp/2014">2014年の各政党のホームページ解析</a></p>
   </div>
 </body>
 </html>

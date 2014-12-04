@@ -1,0 +1,50 @@
+[
+  {
+    "name" : "自民党",
+    "root_url" : "https://special.jimin.jp/",
+    "positive_list" : [],
+    "exclude_filter" : []
+  },
+  {
+    "name" : "公明党",
+    "root_url" : "https://www.komei.or.jp/campaign/shuin2014/",
+    "positive_list" : ["https://www.komei.or.jp/campaign/shuin2014/"],
+    "exclude_filter" : ["https://www.komei.or.jp/local_2011"]
+  },
+  {
+    "name" : "民主党",
+    "root_url" : "http://www.democrats.jp/",
+    "positive_list" : [],
+    "exclude_filter" : []
+  },
+  {
+    "name" : "維新の党",
+    "root_url" : "https://ishinnotoh.jp/",
+    "positive_list" : [],
+    "exclude_filter" : []
+  },
+  {
+    "name" : "次世代の党",
+    "root_url" : "http://www.jisedai.jp/",
+    "positive_list" : [],
+    "exclude_filter" : []
+  },
+  {
+    "name" : "日本共産党",
+    "root_url" : "http://www.jcp.or.jp/web_policy/html/2014-sousenkyo.html",
+    "positive_list" : ["http://www.jcp.or.jp/web_policy/2014/"],
+    "exclude_filter" : []
+  },
+  {
+    "name" : "生活の党",
+    "root_url" : "http://www.seikatsu1.jp/",
+    "positive_list" : [],
+    "exclude_filter" : []
+  },
+  {
+    "name" : "社民党",
+    "root_url" : "http://www5.sdp.or.jp/policy/policy/election/2014/commitment.htm",
+    "positive_list" : ["http://www5.sdp.or.jp/policy/policy.htm","http://www5.sdp.or.jp/vision/vision.htm","http://www5.sdp.or.jp/comment/2014","http://www5.sdp.or.jp/comment/comment.htm"],
+    "exclude_filter" : []
+  }
+]
