@@ -22,7 +22,37 @@ $(function() {
       width: 'resolve' ,
       dropdownAutoWidth: true
     });
-
+    $('#getCurPos').button().click(function() {
+      if (!navigator.geolocation) {
+        //Geolocation APIを利用できない環境向けの処理
+        alert('GeolocateAPIが使用できません');
+      }
+      navigator.geolocation.getCurrentPosition(function(position) {
+        $('#selElectionArea').select2('val', '');
+        $('#selElectionArea').empty();
+        util.getJson(
+          '/analyze_election/json/get_prefecture_election_area_by_pos',
+          {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          },
+          function (errCode, result) {
+            if (errCode) {
+              return;
+            }
+            updateSelElectionArea(result);
+          },
+          function() {
+            $.blockUI({ message: '<img src="/analyze_election/img/loading.gif" />' });
+          },
+          function() {
+            $.unblockUI();
+          }
+        );
+      },function(positionError) {
+        consloe.log(positionError.message);
+      });
+    });
     $('#selPrefecture').change(function() {
       var prefecture = $('#selPrefecture').val();
       console.log(prefecture);
@@ -38,15 +68,10 @@ $(function() {
           prefectureName: prefecture
         },
         function (errCode, result) {
-          console.log(errCode);
-          console.log(result);
           if (errCode) {
             return;
           }
-          for (var i = 0; i < result.length; ++i) {
-            var opt = $('<option>').html(result[i]).val(result[i]);
-            $('#selElectionArea').append(opt);
-          }
+          updateSelElectionArea(result);
         },
         function() {
           $.blockUI({ message: '<img src="/analyze_election/img/loading.gif" />' });
@@ -142,5 +167,13 @@ $(function() {
       return url;
     }
     return '<a href="' + url + '">' + title +'</a>';
+  }
+  function updateSelElectionArea(result) {
+    var opt = $('<option>').html('').val(result[i]);
+    $('#selElectionArea').append(opt);
+    for (var i = 0; i < result.length; ++i) {
+      var opt = $('<option>').html(result[i]).val(result[i]);
+      $('#selElectionArea').append(opt);
+    }
   }
 });

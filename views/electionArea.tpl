@@ -23,6 +23,7 @@
         <option value = "{{prefecture}}">{{prefecture}}</option>
       %end
     </select>
+    <buttion id="getCurPos">現在地から選挙区の候補を検索</buttion>
     <select id="selElectionArea"><option>　　　　　　　　　　</option></select>
     <div id="map_canvas" style="width: 100%; height: 400px"></div>
     <p>選挙区情報:</p>

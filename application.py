@@ -83,6 +83,22 @@ def getPrefectureElectionArea():
     response.content_type = 'application/json;charset=utf-8'
     return dumps(res)
 
+@app.get('/json/get_prefecture_election_area_by_pos')
+def getPrefectureElectionAreaByPos():
+    lat = float(request.query.lat)
+    lng = float(request.query.lng)
+    pos_ret = db.GetPos(lat, lng)
+    prefectureName = pos_ret['prefectureName']
+    subPrefectureName = pos_ret['subPrefectureName']
+    countyName = pos_ret['countyName']
+    cityName = pos_ret['cityName']
+    ret = db.GetElectionArea(prefectureName, subPrefectureName, countyName, cityName)
+    res = []
+    for r in ret:
+        res.append(r[0])
+    response.content_type = 'application/json;charset=utf-8'
+    return dumps(res)
+
 @app.get('/json/get_election_area_information')
 def getElectionAreaInformation():
     electionArea = request.query.electionArea
