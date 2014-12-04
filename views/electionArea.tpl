@@ -17,14 +17,14 @@
   <div id="contents">
     <div id="electionId" electionId="{{electionId}}"></div>
     <h1>小選挙区の区割り</h1>
-    <select id="selPrefecture">
+    県：<select id="selPrefecture">
       <option value = ""></option>
       %for prefecture in prefectures:
         <option value = "{{prefecture}}">{{prefecture}}</option>
       %end
     </select>
     <buttion id="getCurPos">現在地から選挙区の候補を検索</buttion>
-    <select id="selElectionArea"><option>　　　　　　　　　　</option></select>
+    小選挙区：<select id="selElectionArea"><option>　　　　　　　　　　</option></select>
     <div id="map_canvas" style="width: 100%; height: 400px"></div>
     <p>選挙区情報:</p>
     <table class="normal">

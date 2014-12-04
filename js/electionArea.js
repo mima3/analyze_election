@@ -41,6 +41,12 @@ $(function() {
               return;
             }
             updateSelElectionArea(result);
+            if (result.length == 1) {
+              $('#selElectionArea').select2('val', result[0]);
+              $('#selElectionArea').trigger('change');
+            } else {
+              alert('選挙区の候補が複数あります。');
+            }
           },
           function() {
             $.blockUI({ message: '<img src="/analyze_election/img/loading.gif" />' });
