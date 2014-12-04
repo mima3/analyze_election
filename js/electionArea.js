@@ -59,6 +59,7 @@ $(function() {
       $(this).blur().focus();
     });
 
+    // 小選挙区のエリア変更
     $('#selElectionArea').change(function() {
       var electionArea = $('#selElectionArea').val();
       console.log(electionArea);
@@ -68,7 +69,8 @@ $(function() {
       util.getJson(
         '/analyze_election/json/get_election_area_information',
         {
-          electionArea: electionArea
+          electionArea: electionArea,
+          electionId: $('#electionId').attr('electionId')
         },
         function (errCode, result) {
           if (errCode) {
@@ -80,16 +82,16 @@ $(function() {
           polylines = [];
           var tbl = $('#tableElectionArea');
           tbl.empty();
-          for (var i = 0; i < result.length; ++i ) {
-            console.log(result[i]);
+          area = result.area;
+          for (var i = 0; i < area.length; ++i ) {
             var tr = $('<tr/>');
-            $('<td>' + result[i].subPrefectureName + '</td>').appendTo(tr);
-            $('<td>' + result[i].countyName + '</td>').appendTo(tr);
-            $('<td>' + result[i].cityName + '</td>').appendTo(tr);
-            $('<td>' + result[i].notes + '</td>').appendTo(tr);
+            $('<td>' + area[i].subPrefectureName + '</td>').appendTo(tr);
+            $('<td>' + area[i].countyName + '</td>').appendTo(tr);
+            $('<td>' + area[i].cityName + '</td>').appendTo(tr);
+            $('<td>' + area[i].notes + '</td>').appendTo(tr);
             tr.appendTo(tbl);
 
-            var data = result[i].geo;
+            var data = area[i].geo;
             for (var id in data) {
               var points = [];
               for (var j = 0; j < data[id].length; ++j) {
@@ -108,7 +110,21 @@ $(function() {
               polylines.push(poly);
             }
           }
-          
+          var tbl = $('#tableCandidate');
+          tbl.empty();
+          candidates = result.candidate;
+          for (var i = 0; i < candidates.length; ++i ) {
+            var tr = $('<tr/>');
+            $('<td>' + candidates[i].name + '</td>').appendTo(tr);
+            $('<td>' + candidates[i].age + '</td>').appendTo(tr);
+            $('<td>' + candidates[i].party + '</td>').appendTo(tr);
+            $('<td>' + candidates[i].status + '</td>').appendTo(tr);
+            var net = createLink(candidates[i].twitter, 'twitter') + "<BR>" +
+                      createLink(candidates[i].facebook, 'facebook') + "<BR>" +
+                      createLink(candidates[i].homepage, 'homepage')
+            $('<td>' + net + '</td>').appendTo(tr);
+            tr.appendTo(tbl);
+          }
         },
         function() {
           $.blockUI({ message: '<img src="/analyze_election/img/loading.gif" />' });
@@ -121,4 +137,10 @@ $(function() {
       $(this).blur().focus();
     });
   });
+  function createLink(url, title) {
+    if (!url) {
+      return url;
+    }
+    return '<a href="' + url + '">' + title +'</a>';
+  }
 });

@@ -15,6 +15,7 @@
 </head>
 <body>
   <div id="contents">
+    <div id="electionId" electionId="{{electionId}}"></div>
     <h1>小選挙区の区割り</h1>
     <select id="selPrefecture">
       <option value = ""></option>
@@ -24,6 +25,7 @@
     </select>
     <select id="selElectionArea"><option>　　　　　　　　　　</option></select>
     <div id="map_canvas" style="width: 100%; height: 400px"></div>
+    <p>選挙区情報:</p>
     <table class="normal">
       <thead>
         <th>小区</th>
@@ -34,9 +36,22 @@
       <tbody id="tableElectionArea">
       </tbody>
     </table>
+    <p>候補者情報:</p>
+    <table class="normal">
+      <thead>
+        <th>名前</th>
+        <th>年齢</th>
+        <th>党</th>
+        <th>新旧</th>
+        <th></th>
+      </thead>
+      <tbody id="tableCandidate">
+      </tbody>
+    </table>
     <p>このデータは以下から取得したものです</p>
     <p><a href="http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03.html">国土数値情報　行政区域データ</a></p>
     <p><a href="http://www.soumu.go.jp/senkyo/senkyo_s/news/senkyo/shu_kuwari/">総務省　衆議院小選挙区の区割りの改定等について</a></p>
+    <p><a href="http://www.asahi.com/senkyo/sousenkyo47/kouho/">朝日新聞　2014衆院選 候補者</a></p>
   </div>
 </body>
 </html>

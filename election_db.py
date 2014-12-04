@@ -99,6 +99,22 @@ class ElectionDb:
                                  notes TEXT);'''
         self._conn.execute(sql)
 
+        sql = '''CREATE TABLE IF NOT EXISTS candidate(
+                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                 key TEXT ,
+                                 area TEXT,
+                                 name TEXT ,
+                                 age NUMBER ,
+                                 party TEXT ,
+                                 status TEXT ,
+                                 twitter TEXT ,
+                                 facebook TEXT ,
+                                 homepage TEXT);'''
+        self._conn.execute(sql)
+
+        sql = '''CREATE INDEX IF NOT EXISTS candidate_index ON  candidate(key);'''
+        self._conn.execute(sql)
+
 
     def ImportAdministrativeBoundary(self, xml):
         f = None
@@ -378,6 +394,37 @@ class ElectionDb:
             self._conn.execute(sql, [unicode(row[0],'cp932'), unicode(row[1],'cp932'),unicode(row[2],'cp932'),unicode(row[3],'cp932'),unicode(row[4],'cp932'),unicode(row[5],'cp932') ])
 
         self.Commit()
+
+    def ImportCandidate(self, key, path):
+        """
+        小選挙区の候補者情報のCSVの取り込み
+        """
+        reader = csv.reader(open(path,'rb'))
+        self._conn.execute('begin')
+
+        sql = '''DELETE FROM candidate WHERE key = ?'''
+        self._conn.execute(sql, [key])
+
+        for row in reader:
+            sql = '''INSERT INTO candidate
+                     (key,area, name, age, party, status, twitter, facebook, homepage)
+                     VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);'''
+            self._conn.execute(sql, [key, unicode(row[0],'cp932'), unicode(row[1],'cp932'),unicode(row[2],'cp932'),unicode(row[3],'cp932'),unicode(row[4],'cp932'),unicode(row[5],'cp932'),unicode(row[6],'cp932'), unicode(row[7],'cp932')])
+
+        self.Commit()
+
+    def GetCandidate(self, electionId, electionArea):
+        """
+        候補者情報取得
+        """
+        sql = '''select 
+                   name,age,party,status, twitter, facebook, homepage 
+                 from 
+                   candidate
+                 where
+                   key = ? and area = ?'''
+        rows = self._conn.execute(sql, [electionId, electionArea])
+        return rows
 
     def Commit(self):
         self._conn.commit()

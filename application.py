@@ -86,8 +86,9 @@ def getPrefectureElectionArea():
 @app.get('/json/get_election_area_information')
 def getElectionAreaInformation():
     electionArea = request.query.electionArea
+    electionId = request.query.electionId
     ret = db.GetElectionAreaInformation(electionArea)
-    res = []
+    area_res = []
     for r in ret:
       prefectureName = r[2]
       subPrefectureName = r[3]
@@ -95,7 +96,7 @@ def getElectionAreaInformation():
       cityName = r[5]
       retGeo = db.GetCityGeo(prefectureName, subPrefectureName, countyName, cityName)
       resGeo = convertGeoResult(retGeo)
-      res.append({
+      area_res.append({
           'key':r[0],
           'notes':r[1],
           'prefectureName':prefectureName,
@@ -104,7 +105,23 @@ def getElectionAreaInformation():
           'cityName':cityName,
           'geo': resGeo
       })
+    candidate = []
+    ret = db.GetCandidate(electionId, electionArea)
+    for r in ret:
+        candidate.append({
+            'name': r[0],
+            'age': r[1],
+            'party': r[2],
+            'status': r[3],
+            'twitter': r[4],
+            'facebook': r[5],
+            'homepage': r[6],
+        })
 
+    res = {
+        'area' : area_res,
+        'candidate' : candidate
+    }
     response.content_type = 'application/json;charset=utf-8'
     return dumps(res)
 
@@ -114,10 +131,10 @@ def homePage():
     return template('home').replace('\n', '');
 
 
-@app.get('/page/ElectionArea')
-def electionAreaPage():
+@app.get('/page/ElectionArea/<electionId>')
+def electionAreaPage(electionId):
     prefectures = db.GetPrefecture()
-    return template('electionArea', prefectures=prefectures).replace('\n', '');
+    return template('electionArea', prefectures=prefectures, electionId=electionId).replace('\n', '');
 
 
 @app.get('/page/dondt')
