@@ -22,7 +22,20 @@ def print_area(url):
             age = m.xpath('td[@class="age"]')[0].text_content().encode('utf-8')
             party = m.xpath('td[@class="party"]')[0].text_content().encode('utf-8')
             status = m.xpath('td[@class="status"]')[0].text_content().encode('utf-8')
-            print ('%s,%s,%s,%s,%s' % (areaName, name, age, party, status))
+            net = m.xpath('td[@class="net"]/ul')[0]
+            twitterEl = net.xpath('li[@id="twitter"]/a')
+            facebookEl = net.xpath('li[@id="facebook"]/a')
+            hpEl = net.xpath('li[@id="HomePage1"]/a')
+            twitter = ''
+            facebook = ''
+            hp = ''
+            if twitterEl:
+                twitter=twitterEl[0].attrib['href'].encode('utf-8')
+            if facebookEl:
+                facebook=facebookEl[0].attrib['href'].encode('utf-8')
+            if hpEl:
+                hp=hpEl[0].attrib['href'].encode('utf-8')
+            print ('%s,%s,%s,%s,%s,%s,%s,%s' % (areaName, name, age, party, status, twitter, facebook, hp))
 
 
 def main(argvs, argc):
