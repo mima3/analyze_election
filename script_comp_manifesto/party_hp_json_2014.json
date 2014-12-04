@@ -27,7 +27,7 @@
     "name" : "次世代の党",
     "root_url" : "http://www.jisedai.jp/",
     "positive_list" : [],
-    "exclude_filter" : []
+    "exclude_filter" : ["http://www.jisedai.jp/en/"]
   },
   {
     "name" : "日本共産党",
@@ -39,7 +39,7 @@
     "name" : "生活の党",
     "root_url" : "http://www.seikatsu1.jp/",
     "positive_list" : [],
-    "exclude_filter" : []
+    "exclude_filter" : ["http://www.seikatsu1.jp/english"]
   },
   {
     "name" : "社民党",

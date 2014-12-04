@@ -48,3 +48,4 @@ Temporary Items
 /index.cgi
 /session
 /script/*.pyc
+/script_comp_manifesto/*.pyc
