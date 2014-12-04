@@ -2,7 +2,11 @@
 <html lang="ja">
 <head>
   <title>{{year}}年の各政党のホームページ解析</title>
+  <link rel="stylesheet" href="/analyze_election/js/jqcloud/jqcloud.css" type="text/css" />
   <link rel="stylesheet" href="/analyze_election/base.css" type="text/css" />
+  <script type="text/javascript" src="/analyze_election/js/jquery/jquery-1.11.1.min.js"></script>
+  <script type="text/javascript" src="/analyze_election/js/jqcloud/jqcloud-1.0.4.min.js" ></script>
+  <script type="text/javascript" src="/analyze_election/js/analyzehp.js" ></script>
 </head>
 <body>
   <div id="contents">
@@ -47,19 +51,22 @@
                </p>
             %end
         %end
-        <p>上位100件の単語:</p>
-        <table class="normal">
-            <tr>
-              <th>単語</th>
-              <th>tf-idf</th>
-            </tr>
-            %for w in party['words']:
-            <tr>
-               <td>{{w['text']}}</td>
-               <td>{{w['weight']}}</td>
-            </tr>
-            %end
-        </table>
+        <div class="words" name="{{party['name']}}">
+          <div class="tagcloud" style="width: 100%; height: 480px;"></div>
+          <p>上位100件の単語:</p>
+          <table class="normal">
+              <tr>
+                <th>単語</th>
+                <th>tf-idf</th>
+              </tr>
+              %for w in party['words']:
+              <tr class="data" text="{{w['text']}}" weight="{{w['weight']}}">
+                 <td>{{w['text']}}</td>
+                 <td>{{w['weight']}}</td>
+              </tr>
+              %end
+          </table>
+        </div>
     %end
 </body>
 </html>
