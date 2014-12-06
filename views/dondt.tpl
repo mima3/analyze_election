@@ -13,6 +13,7 @@
   <script type="text/javascript" src="/analyze_election/js/jsGrid/jquery.jqGrid.src.js" ></script>
   <script type="text/javascript" src="/analyze_election/js/jsGrid/i18n/grid.locale-ja.js" ></script>
   <script type="text/javascript" src="/analyze_election/js/util.js"></script>
+  <script type="text/javascript" src="/analyze_election/js/store/store.min.js"></script>
   <script type="text/javascript" src="/analyze_election/js/dondt.js"></script>
 </head>
 <body>

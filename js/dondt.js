@@ -5,10 +5,22 @@ $(function() {
   $(document).ready(function()
   {
     var electionId = $('#electionId').attr('electionId');
-
+    var storedata = store.get('analyze_election');
+    if (!storedata) {
+      storedata = {}
+      storedata['dondt'] = {};
+      storedata['dondt'][electionId] = {};
+    }
     $("#calc_dondt").button().click(function(event){
       $("#votes").restoreCell(lCurEditRow,lCurEditCol);
       var vote_data = $("#votes").getRowData();
+      storedata['dondt'][electionId] = {};
+      for (var i = 0; i < vote_data.length; ++i) {
+        var key = vote_data[i].block + '_' + vote_data[i].party;
+        storedata['dondt'][electionId][key] = vote_data[i].votes;
+      }
+      store.set('analyze_election', storedata);
+
       $.blockUI({ message: '<img src="/analyze_election/img/loading.gif" />' });
       $.ajax({
         type:'POST',
@@ -71,7 +83,12 @@ $(function() {
       {},
       function (errCode, result) {
           $("#votes").clearGridData();
-          console.log(result);
+          for (var i = 0; i < result.length; ++i) {
+            var key = result[i].block + '_' + result[i].party;
+            if (storedata['dondt'][electionId][key]) {
+              result[i].votes = storedata['dondt'][electionId][key];
+            }
+          }
           $("#votes").addRowData("1",result);
           $('#votes').groupingGroupBy('block');
       },
