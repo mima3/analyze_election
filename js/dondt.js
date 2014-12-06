@@ -1,52 +1,49 @@
 $(function() {
   var lCurEditRow;
   var lCurEditCol;
-  function calc_dondt(successFunc)
-  {
-    var max_seats = $("#max_seats").val();
-    $("#votes").restoreCell(lCurEditRow,lCurEditCol);
-    var vote_data = $("#votes").getRowData();
-    $.ajax({
-      type:'POST',
-      url: 'main.py?CalcDondt',
-      data: { max_seats:max_seats,vote_data:JSON.stringify(vote_data)},
-      dataType:'json',
-      success: function(json) {
-        vote_data=json;
-        $("#votes").clearGridData();
-        $("#votes").addRowData("1",vote_data);
-      },
-      complete:function(json) {
-      },
-      error: function(xhr, textStatus, errorThrown){
-        alert('Failed CalcDondt.' );
-      }
-    });
-  }
 
   $(document).ready(function()
   {
-    var vote_data = [
-      {
-        name: '自民党',
-        votes: 0,
-        max: 0,
-        seats: 0
-      }
-    ];
+    var electionId = $('#electionId').attr('electionId');
+
     $("#calc_dondt").button().click(function(event){
-      event.preventDefault();
-      calc_dondt( function() {} );
+      $("#votes").restoreCell(lCurEditRow,lCurEditCol);
+      var vote_data = $("#votes").getRowData();
+      $.blockUI({ message: '<img src="/analyze_election/img/loading.gif" />' });
+      $.ajax({
+        type:'POST',
+        url: '/analyze_election/json/calc_dondt/' + electionId,
+        data: {vote_data: JSON.stringify(vote_data)},
+        dataType:'json',
+        success: function(json) {
+          $("#votes").clearGridData();
+          $("#votes").addRowData('1',json.vote_data);
+          $('#votes').groupingGroupBy('block');
+
+          $("#result").clearGridData();
+          $("#result").addRowData('1',json.result);
+        },
+        complete:function(json) {
+          $.unblockUI();
+        },
+        error: function(xhr, textStatus, errorThrown){
+          alert('Failed CalcDondt.' );
+          $.unblockUI();
+        }
+      });
     });
+
     $("#votes").jqGrid({
-      data:vote_data,
+      data: undefined,
       datatype:"local",
-      colNames:["政党","立候補者数","投票数","議席"],
+      rowNum:1000,
+      colNames:["ブロック","政党","立候補者数","投票数","議席"],
       colModel:[
-        {name:'name'},
-        {name:'max', editable:true,edittype:'text',align:'right',editrules:{integer:true}, formatter:'integer',sorttype:'int'},
-        {name:'votes', editable:true,edittype:'text',align:'right',editrules:{integer:true}, formatter:'integer',sorttype:'int'},
-        {name:'seats',align:'right',sorttype:'int'},
+        {name:'block',sortable: false, editable:false},
+        {name:'party',sortable: false, editable:false},
+        {name:'max', sortable: false,editable:false, align:'right', formatter:'integer'},
+        {name:'votes',sortable: false, editable:true,edittype:'text',align:'right',editrules:{integer:true}, formatter:'integer'},
+        {name:'seats',sortable: false, align:'right'},
       ],
       height:'100%',
       width:'100%',
@@ -59,8 +56,46 @@ $(function() {
         lCurEditCol = iCol;
         
       },
+      grouping:true,
+      groupingView : {
+        groupField : ['block'],
+        groupColumnShow : [false],
+        groupText : ['<b>{0} - {1} Item(s)</b>']
+      },
       cellEdit:true,
       cellsubmit:'clientArray',
     });
+
+    util.getJson(
+      '/analyze_election/json/dondt/' + electionId,
+      {},
+      function (errCode, result) {
+          $("#votes").clearGridData();
+          console.log(result);
+          $("#votes").addRowData("1",result);
+          $('#votes').groupingGroupBy('block');
+      },
+      function() {
+        $.blockUI({ message: '<img src="/analyze_election/img/loading.gif" />' });
+      },
+      function() {
+        $.unblockUI();
+      }
+    );
+
+    $("#result").jqGrid({
+      data:undefined,
+      datatype:"local",
+      colNames:["党名","議席数"],
+      colModel:[
+        {name:'party'},
+        {name:'seats',align:'right',sorttype:'int'}
+      ],
+      height:'100%',
+      width:'100%',
+      multiselect: false,
+      caption: '計算数'
+    });
   });
+
 });

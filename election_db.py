@@ -5,10 +5,16 @@ import sys
 import os
 from lxml import etree
 from rdp import rdp
+# sympy==0.7.5 でないと、Polygon生成時に"Polygon has intersecting sides."が出る。
+# 以下のコードで再現
+# p=[(0, 0), (1, 0), (5, 1), (0, 1), (3, 0)]
+# Polygon(*p)
 from sympy.geometry import Point, Polygon
 import pickle
 import time
 import csv
+import gc
+from sympy.core.cache import *
 
 class ElectionDb:
     """
@@ -115,6 +121,31 @@ class ElectionDb:
         sql = '''CREATE INDEX IF NOT EXISTS candidate_index ON  candidate(key);'''
         self._conn.execute(sql)
 
+        sql = '''CREATE TABLE IF NOT EXISTS election_hirei_block(
+                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                 key TEXT,
+                                 block TEXT,
+                                 seats INTEGER);'''
+        self._conn.execute(sql)
+
+        sql = '''CREATE TABLE IF NOT EXISTS candidate_hirei(
+                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                 key TEXT ,
+                                 block TEXT,
+                                 party TEXT ,
+                                 num INTEGER,
+                                 name TEXT ,
+                                 age NUMBER ,
+                                 status TEXT ,
+                                 area TEXT,
+                                 twitter TEXT ,
+                                 facebook TEXT ,
+                                 homepage TEXT);'''
+        self._conn.execute(sql)
+
+        sql = '''CREATE INDEX IF NOT EXISTS candidate_hirei_index ON  candidate_hirei(key);'''
+        self._conn.execute(sql)
+
 
     def ImportAdministrativeBoundary(self, xml):
         f = None
@@ -182,7 +213,7 @@ class ElectionDb:
                     if len(pt) != 2:
                       continue
                     poly.append([float(pt[0]), float(pt[1])])
-                polyRdp = poly # rdp(poly, epsilon=0.001)
+                polyRdp = rdp(poly, epsilon=0.001)
                 for pt in polyRdp:
                   lat = pt[0]
                   lng = pt[1]
@@ -295,11 +326,12 @@ class ElectionDb:
         """
         curveテーブルからpolygonの作成
         """
-        self._conn.execute('begin')
+        #gc.enable()
+        #gc.set_debug(gc.DEBUG_LEAK)
         sql = '''DELETE FROM polygon'''
         self._conn.execute(sql)
 
-        sql = '''select curve_id,lat,lng from curve  order by curve_id'''
+        sql = '''select curve_id,lat,lng from curve order by curve_id'''
         rows = self._conn.execute(sql)
         dict = {}
         for r in rows:
@@ -307,16 +339,25 @@ class ElectionDb:
             if dict.get(key) is None:
                 dict[key] = []
             dict[key].append((r[1], r[2]))
-
+        i = 0
         for key in dict:
-            print (key)
-            poly = Polygon(*dict[key])
-            obj = pickle.dumps(poly)
-            sql = '''INSERT INTO polygon
-                           (curve_id, object)
-                         VALUES(?, ?);'''
-            self._conn.execute(sql, [key, obj ])
-        self.Commit()
+            print (key + ":" + str(i))
+            #b = len(gc.get_objects())
+            self._createPoly(key, dict[key])
+            i = i + 1
+            clear_cache()
+            gc.collect()
+            #print str(b) + ":" + str(len(gc.get_objects()))
+
+    def _createPoly(self, key, list):
+        poly = Polygon(*list)
+        obj = pickle.dumps(poly)
+        sql = '''INSERT INTO polygon
+                       (curve_id, object)
+                     VALUES(?, ?);'''
+        self._conn.execute(sql, [key, obj ])
+        del poly
+        del obj
 
     def GetPos(self, lat, long):
         """
@@ -413,6 +454,35 @@ class ElectionDb:
 
         self.Commit()
 
+    def ImportHirei(self, key, block_path, candidate_path):
+        """
+        比例区の候補者情報のCSVの取り込み
+        """
+        reader = csv.reader(open(candidate_path,'rb'))
+        self._conn.execute('begin')
+
+        sql = '''DELETE FROM candidate_hirei WHERE key = ?'''
+        self._conn.execute(sql, [key])
+
+        for row in reader:
+            sql = '''INSERT INTO candidate_hirei
+                     (key, block, party, num, name, age, status, area, twitter, facebook, homepage)
+                     VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'''
+            self._conn.execute(sql, [key, unicode(row[0],'cp932'), unicode(row[1],'cp932'),unicode(row[2],'cp932'),unicode(row[3],'cp932'),unicode(row[4],'cp932'),unicode(row[5],'cp932'),unicode(row[6],'cp932'), unicode(row[7],'cp932'), unicode(row[8],'cp932'), unicode(row[9],'cp932')])
+
+
+        sql = '''DELETE FROM election_hirei_block WHERE key = ?'''
+        self._conn.execute(sql, [key])
+
+        reader = csv.reader(open(block_path,'rb'))
+        for row in reader:
+            sql = '''INSERT INTO election_hirei_block
+                     (key, block, seats)
+                     VALUES(?, ?, ?);'''
+            self._conn.execute(sql, [key, unicode(row[0],'cp932'), unicode(row[1],'cp932')])
+
+        self.Commit()
+
     def GetCandidate(self, electionId, electionArea):
         """
         候補者情報取得
@@ -424,6 +494,33 @@ class ElectionDb:
                  where
                    key = ? and area = ?'''
         rows = self._conn.execute(sql, [electionId, electionArea])
+        return rows
+
+    def GetHireiBlock(self, electionId):
+        """
+        比例ブロックの一覧を取得
+        """
+        sql = '''select 
+                   block, seats
+                 from 
+                   election_hirei_block
+                 where
+                   key = ? order by id '''
+        rows = self._conn.execute(sql, [electionId])
+        return rows
+
+    def GetHireiBlockInfo(self, electionId, block):
+        """
+        比例ブロックの情報を取得
+        """
+        sql = '''select
+             candidate_hirei.party,
+             count(*)
+            from
+             candidate_hirei
+            group by candidate_hirei.block, candidate_hirei.party
+            having key = ? and candidate_hirei.block = ? '''
+        rows = self._conn.execute(sql, [electionId, block])
         return rows
 
     def Commit(self):

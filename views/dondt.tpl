@@ -16,11 +16,13 @@
   <script type="text/javascript" src="/analyze_election/js/dondt.js"></script>
 </head>
 <body>
+  <div id="electionId" electionId="{{electionId}}"></div>
   <div id="contents">
-    <h1>ドント式の計算</h1>
+    <h1>比例代表の議席をドント式により計算</h1>
+    <p>投票数を入力して、「計算」ボタンを押してください。</p>
     <table id="votes" ></table>
-    <p>議席数 <input id="max_seats" name="max_seats"  size="50" value="48"/></p>
-    <p><button id="calc_dondt">試算</button></p>
+    <p><button id="calc_dondt">計算</button></p>
+    <table id="result" ></table>
   </div>
 </body>
 </html>

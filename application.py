@@ -6,6 +6,8 @@ from twitter_utility import TwitterUtility
 import os
 import json
 import math
+import dondt_util
+from collections import defaultdict
 
 app = Bottle()
 db = None
@@ -153,11 +155,56 @@ def electionAreaPage(electionId):
     return template('electionArea', prefectures=prefectures, electionId=electionId).replace('\n', '');
 
 
-@app.get('/page/dondt')
-def electionAreaPage():
-    prefectures = db.GetPrefecture()
-    return template('dondt', prefectures=prefectures).replace('\n', '');
+@app.get('/page/dondt/<electionId>')
+def dondtPage(electionId):
+    return template('dondt', electionId = electionId).replace('\n', '');
 
+@app.get('/json/dondt/<electionId>')
+def dondtJson(electionId):
+    blocks = db.GetHireiBlock(electionId)
+    res = []
+    for b in blocks:
+        bInfo = db.GetHireiBlockInfo(electionId, b[0])
+        for info in bInfo:
+            res.append({
+                'block' : b[0],
+                'party' : info[0],
+                'max' : info[1],
+                'votes': 0,
+                'seats': 0
+            })
+    response.content_type = 'application/json;charset=utf-8'
+    return dumps(res)
+
+@app.post('/json/calc_dondt/<electionId>')
+def calcDondtJson(electionId):
+    data = json.loads(request.params.vote_data)
+
+    blocks = db.GetHireiBlock(electionId)
+    blockinfo = {}
+    for b in blocks:
+        blockinfo[b[0]] = b[1]
+
+    retDict = defaultdict(int)
+    dictBlock = {}
+    for d in data:
+        if not d['block'] in dictBlock:
+            dictBlock[d['block']] = defaultdict(dondt_util.political_party_info)
+        dictBlock[d['block']][d['party']] = dondt_util.political_party_info(d['party'], int(d['votes']), int(d['max']))
+    for k, partydict in dictBlock.items():
+        max_seats = blockinfo[k.encode('utf-8')]
+        dictBlock[k] = dondt_util.dondt(partydict, max_seats)
+
+    for d in data:
+        d['seats'] = dictBlock[d['block']][d['party']].seats
+        retDict[d['party']] += dictBlock[d['block']][d['party']].seats
+
+    ret = []
+    for k, v in retDict.items():
+        ret.append({'party':k, 'seats':v})
+
+    response.content_type = 'application/json;charset=utf-8'
+    return dumps({'vote_data':data, 'result':ret})
 
 @app.get('/page/nicolive/<nicoliveId>')
 def nicoLivePage(nicoliveId):
@@ -173,7 +220,7 @@ def representsInt(s):
 
 @app.get('/json/get_nicolive_comment/<nicoliveId>')
 def getNicoLiveComment(nicoliveId):
-    limit = 20
+    limit = 20 # 1ページの行数
     page = int(request.query.page)
     offset = limit * (page-1)
     filters = []
