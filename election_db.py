@@ -340,14 +340,19 @@ class ElectionDb:
                 dict[key] = []
             dict[key].append((r[1], r[2]))
         i = 0
+        self.Commit()
+
+        self._conn.execute('begin')
         for key in dict:
             print (key + ":" + str(i))
             #b = len(gc.get_objects())
             self._createPoly(key, dict[key])
             i = i + 1
-            clear_cache()
-            gc.collect()
+            #gc.collect()
             #print str(b) + ":" + str(len(gc.get_objects()))
+            if i % 100 == 0:
+                clear_cache()
+                self.Commit()
 
     def _createPoly(self, key, list):
         poly = Polygon(*list)
